@@ -18,19 +18,35 @@ print('Diretorio do script: ', pydir)
 os.chdir(pydir)
 
 # Coloque a função de Upload aqui
-'''
+
 def Upload(file, conn):
+    try:
+        f = open(file,'r')
+    except:
+        print('erro abertura arquivo')
+	
+    try: 
+        count = 0
+        while True:
+            line = f.readline()
+            data = conn.send(bytes(line,'utf-8'))
+            if not data:
+                break 	  
+        f.close()
+    except:
+        f.close()
+        conn.send(bytes('A PORTA DE DADOS NÃO ESTA ABERTA\n','utf-8'))
 
-     Abrir o arquivo em modo leitura
+     #Abrir o arquivo em modo leitura
+     #Ler uma linha do arquivo de cada vez
+     #Transmitir a linha para o servidor (converta a linha para bytes com encode())
+     #Após transmitir a última linha fechar o arquivo
+     
 
-     Ler uma linha do arquivo de cada vez
-
-     Transmitir a linha para o servidor (converta a linha para bytes com encode())
-
-     Após transmitir a última linha fechar o arquivo
-	'''
 #--------------------------------------------------------------------
 
+
+#socket do processo client principal
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
     s.connect((HOST, PORT))
@@ -68,45 +84,39 @@ if isDir == False:
 	print('O arquivo especificado não existe')
 	sys.exit()
 
-conectividade.upload_file(diretorio,arquivo,s);
-
-
-
-'''
- def upload_file(diretorio,arquivo,s):
+def upload_handshake(diretorio,arquivo,s):
+ 
+ 	#socket do canal de transferencia do cliente
 	s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
 	try:
-
 	    s2.bind(('', 9998))
-
 	    s2.listen(1)
 
 	except:
-
 	    print('# erro de bind')
-
 	    sys.exit()
 
-	# Envia ordem de upload ao servidor
+	# Envia ordem de upload ao servidor // socket do processo principal do cliente
 	s.send(bytes('upload({}{})\n'.format(diretorio,arquivo), 'utf-8'))
 
-	# Aguarda a conexão para criar o canal de dados
+	# Aguarda a conexão para criar o canal de dados // conn -> socket do canal de transferencia da parte do server
 	conn, addr = s2.accept()
 	print('Servidor {} fez a conexao'.format(addr))
-	# Chama a função que transfereo arquivo pelo canal de dados
-	Upload(arquivo, conn) 
+	
+	# Chama a função que transfere o arquivo pelo canal de dados
+	Upload(arquivo,conn) 
 
 	conn.close()
-
+	
 	s2.close()
 
 	print('O arquivo foi transferido')
-
+	
 	input('Digite <ENTER> para encerrar') 
-	'''
+	
+	
 
-
+upload_handshake(diretorio,arquivo,s);
 
 
 
